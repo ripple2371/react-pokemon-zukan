@@ -1,3 +1,4 @@
+import PokemonCard from './PokemonCard'
 import { useState } from 'react'
 import heroImg from './assets/hero.png'
 import reactLogo from './assets/react.svg'
@@ -16,7 +17,10 @@ function App() {
           <img src={viteLogo} className="vite" alt="Vite logo" />
         </div>
         <div>
-          <h1>Get started</h1>
+          <h1>ポケモン図鑑へようこそ！</h1>
+          <PokemonCard number={25} name="ピカチュウ" />
+<PokemonCard number={1} name="フシギダネ" />
+<PokemonCard number={4} name="ヒトカゲ" />
           <p>
             Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
           </p>
