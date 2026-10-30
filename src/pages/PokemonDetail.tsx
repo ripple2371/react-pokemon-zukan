@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import React from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { fetchPokemonDetail, PokemonNotFoundError } from '../api/pokemonDetail';
-import { fetchPokemonIndex } from '../api/pokemon';
+import { usePokemonNeighbors } from '../hooks/usePokemonNeighbors';
 import PokemonTypeLabel from '../components/PokemonTypeLabel';
 import { apiQueryKeys } from '../queryKeys';
 import Skeleton from 'react-loading-skeleton';
@@ -21,18 +21,9 @@ const PokemonDetail: React.FC = () => {
     retry: (failureCount, queryError) => !(queryError instanceof PokemonNotFoundError) && failureCount < 3,
   });
 
-  const { data: pokemonIndex, isError: indexError, isFetching: isFetchingIndex, refetch: refetchIndex } = useQuery({
-    queryKey: apiQueryKeys.pokemon.index,
-    queryFn: fetchPokemonIndex,
-    enabled: isValidId,
-    staleTime: 60 * 60 * 1000,
-    gcTime: 60 * 60 * 1000,
-  });
-  const currentIndex = pokemonIndex?.findIndex((pokemon) =>
-    Number(pokemon.url.split('/').filter(Boolean).pop()) === pokemonId
-  ) ?? -1;
-  const previousPokemon = currentIndex > 0 ? pokemonIndex?.[currentIndex - 1] : undefined;
-  const nextPokemon = currentIndex >= 0 ? pokemonIndex?.[currentIndex + 1] : undefined;
+  const { data: neighbors, isError: indexError, isFetching: isFetchingIndex, refetch: refetchIndex } = usePokemonNeighbors(pokemonId, isValidId && !!data);
+  const previousPokemon = neighbors?.previous;
+  const nextPokemon = neighbors?.next;
 
   if (!isValidId) {
     return (
@@ -119,7 +110,7 @@ const PokemonDetail: React.FC = () => {
           </div>
         </div>
       </div>
-      {indexError && !pokemonIndex ? (
+      {indexError && !neighbors ? (
         <div className="mt-4">
           <p role="alert">前後のポケモンを確認できませんでした。</p>
           <button type="button" onClick={() => void refetchIndex()} disabled={isFetchingIndex} className="mt-2 text-blue-500 underline disabled:opacity-50">
