@@ -12,6 +12,7 @@ const result = await build({
     load(id) {
       if (id === '\0verify') return `
         export * from '/src/api/pokemon.ts';
+        export * from '/src/api/pokemonDetail.ts';
         export * from '/src/api/pokemonSpecies.ts';
         export * from '/src/api/pokemonWithJapaneseName.ts';
         export * from '/src/queryKeys.ts';
@@ -54,6 +55,9 @@ try {
   assert.equal(await api.fetchPokemonJapaneseName(speciesUrl, 'fallback'), 'fallback');
   console.error = () => {};
   globalThis.fetch = async () => new Response('', { status: 503 });
+  await assert.rejects(api.fetchPokemonDetail(1), /詳細情報の取得に失敗/);
+  globalThis.fetch = async () => new Response('', { status: 404 });
+  await assert.rejects(api.fetchPokemonDetail(999999), api.PokemonNotFoundError);
   await assert.rejects(api.fetchPokemonList(), /一覧の取得に失敗/);
   assert.equal(await api.fetchPokemonJapaneseName(speciesUrl, 'fallback'), 'fallback');
   globalThis.fetch = async (url) => url === detailUrl
@@ -87,6 +91,18 @@ if (process.argv.includes('--live')) {
     assert.ok(first.results[0].types.length > 0);
     const next = await api.fetchPokemonList(1, 1);
     assert.equal(next.results[0].name, 'ivysaur');
+    const detail = await api.fetchPokemonDetail(1);
+    assert.equal(detail.japaneseName, 'フシギダネ');
+    assert.equal(detail.number, 1);
+    assert.equal(detail.baseStats.length, 6);
+    assert.equal(detail.baseStats.reduce((sum, stat) => sum + stat.value, 0), 318);
+    assert.ok(detail.types.includes('くさ'));
+    assert.ok(detail.abilities.includes('しんりょく'));
+    const form = await api.fetchPokemonDetail(10001);
+    assert.equal(form.id, 10001);
+    assert.equal(form.number, 386);
+    const index = await api.fetchPokemonIndex();
+    assert.ok(index.some((pokemon) => pokemon.url.endsWith('/10001/')));
     console.log('PASS: 実PokeAPIの一覧・詳細・日本語名取得、次ページ取得');
   } finally { globalThis.fetch = originalFetch; }
 }
