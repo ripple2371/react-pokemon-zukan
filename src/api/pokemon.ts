@@ -19,3 +19,11 @@ export const fetchPokemonList = async (offset: number = 0, limit: number = 20): 
   const data = await response.json();
   return data;
 };
+
+// 件数をAPIから確認する。IDに欠番があっても、実在する項目の順番で移動できる。
+export const fetchPokemonIndex = async (): Promise<PokemonListResult['results']> => {
+  const firstPage = await fetchPokemonList(0, 1);
+  if (!firstPage.next) return firstPage.results;
+  const allPokemon = await fetchPokemonList(0, firstPage.count);
+  return allPokemon.results;
+};
