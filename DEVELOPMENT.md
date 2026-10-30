@@ -249,3 +249,47 @@ index.html、src/App.tsx、src/index.css、src/components/Header.tsx、src/compo
 ### 引き継ぎ
 
 本レビューPRのレビュー待ちで停止する。公開を妨げる新たな機能不具合はテスト範囲では発見していないが、上記の公開先/実機確認は残る。初回81回・英語fallbackのキャッシュ・後方フォームの索引走査・外部JSONの実行時検証なしといった既知の制限はREADMEに明記済み。
+
+
+## 第5回：最終統合と本番公開（2026-10-31）
+
+### 承認・マージ
+
+ユーザーからPR #4のマージとPages有効化・本番公開を明示的に承認された後に実施。
+PR #4のhead bdf05c802e1c249bc435c4c890b116634825f83dは競合なし、未解決レビュー/会話コメントなし。GitHubのCI実行はなかった。
+ローカルでnpm ci、build、lint、check:api、check:api -- --live、check:ui（24件）すべて成功後、履歴を残すmerge方式で統合した。
+最新main/公開対象は `0399642b3d8aea8fbfe1da2aa773d51447b78e2a`。検証したPR headとマージ後mainのファイル差分がゼロであることも確認。
+mainへの直接push、強制push、既存ブランチ削除は実施していない。
+
+### PagesとGitHub Actions
+
+開始時はhas_pages=false、Pages APIは404。管理権限のあるGitHub CLI認証を確認できたため、承認後にbuild_type=workflowで有効化した。
+SourceはGitHub Actions、HTTPS有効。既存のdeploy.ymlをmainに対して手動実行した（1回のみ）。
+実行URL: https://github.com/ripple2371/react-pokemon-zukan/actions/runs/41132782666
+対象コミット: 0399642b3d8aea8fbfe1da2aa773d51447b78e2a
+build / deployは両方success。出力dist、Node24、公式Pages Actionsの構成で公開成功。
+公開URL: https://ripple2371.github.io/react-pokemon-zukan/
+詳細URL: https://ripple2371.github.io/react-pokemon-zukan/#/pokemon/25
+
+### ローカル検証と本番検証の区別
+
+ローカル: 指定6コマンド成功。UIはAPI/画像を模擬した375/768/1280pxの24件。APIの--liveは実PokeAPIを使用。
+本番: 実公開URLをChromeで開き、外部データを差し替えず以下を確認した。
+
+- トップHTTP200、日本語カード40件、フシギダネ、No.25/ピカチュウの画像URL対応、最初の画像ロード成功。
+- 追加読み込みで80件。カードから詳細への遷移。
+- ピカチュウの名前/画像、でんき、せいでんき・ひらいしん、6種族値35/55/40/50/50/90と合計320。
+- 次へでライチュウ26、前へでピカチュウ25、一覧へ戻る。
+- 375/768/1280pxそれぞれで一覧・詳細25・不正ID・存在しないID・アプリ404の計15表示を確認。すべて横overflowなし。
+- 公開詳細URLを直接開くことと、そのURLでの再読み込み成功。
+- ピカチュウ詳細の3画面幅スクリーンショットと375px一覧を保存し、スマートフォン詳細を目視確認。
+
+本番異常系: 独立した検証ブラウザ内だけでPokeAPIリクエストをabortし、エラー表示を確認。中断を解除して再読み込みボタンで実APIから40件に復旧した。本番サーバー/全ユーザーの通信を変更したわけではない。
+Consoleの404は存在しないポケモン999999の検証で発生した期待どおりのもの。別の対象限定検証で、失敗したHTTPリソースが https://pokeapi.co/api/v2/pokemon/999999/ の404だけであり、JS/CSS/画像などの予期しない失敗がないことを確認。通常動作の重大なブラウザ例外は検出しなかった。
+
+### 問題・未検証・残作業
+
+公開を妨げる問題は発生していない。Pages/認証/Actionsの権限不足もなかった。代替公開方式への切替や無断再デプロイは行っていない。
+iOS/Android実機、Safari/Firefox、スクリーンリーダー、全ポケモン全フォームの網羅的な人手確認は未実施。
+初回81回などの既知制限は前回までの記録とREADMEを参照。
+READMEの「未公開」表記と本記録は、公開後の文書更新専用ブランチdocs/production-verificationで別PRとして提示する。文書PRはマージしない。本番の機能は第16章まで統合・公開済み。
