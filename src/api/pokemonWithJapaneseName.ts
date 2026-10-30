@@ -1,3 +1,4 @@
+import { fetchResource } from './resource';
 // src/api/pokemonWithJapaneseName.ts
 import { INITIAL_POKEMON_LIST_LIMIT } from '../config';
 import { fetchPokemonList } from './pokemon';
@@ -35,11 +36,7 @@ export const fetchPokemonListWithJapaneseNames = async (
   const updatedResults: PokemonWithJapaneseName[] = await Promise.all(
     pokemonList.results.map(async (pokemon) => {
       // 2-1. ポケモンの詳細情報を取得
-      const response = await fetch(pokemon.url);
-      if (!response.ok) {
-        throw new Error('ポケモンの詳細情報の取得に失敗しました');
-      }
-      const pokemonDetails: Pokemon = await response.json();
+      const pokemonDetails = await fetchResource<Pokemon>(pokemon.url, 'ポケモンの詳細情報の取得に失敗しました');
 
       // 2-2. 日本語名を取得
       const speciesUrl = pokemonDetails.species.url;
