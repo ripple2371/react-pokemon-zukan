@@ -72,3 +72,29 @@ mainへの直接push・マージは行わず、`feat/chapters-7-9` でレビュ�
 
 18タイプ・API・日本語フォールバック・Provider・キーを再確認。build・lint・check:api -- --live成功。全importがreact-router-domを使用していることを確認し、直接依存react-routerを7.18.5に統一。dom側の7.18.5と重複を解消し、ルーティングAPIの変更なし。
 
+
+## 第2回：第10〜11章
+
+第7〜9章のPR: https://github.com/ripple2371/react-pokemon-zukan/pull/1 （未マージ）。そのheadから `feat/chapters-10-11` を作成。
+
+### 変更ファイル
+
+- `src/components/PokemonCard.tsx`: 日本語名・図鑑番号・画像・詳細リンク。既存の練習用 `src/PokemonCard.tsx` は保持。
+- `src/pages/PokemonList.tsx`: useInfiniteQuery、40件単位、IntersectionObserver、自動・手動追加取得、スケルトン、初回/追加/更新失敗時の再試行。
+- `src/api/pokemonDetail.ts`: 詳細・種族・タイプ・特性・種族値の日本語取得。画像フォールバック、404専用エラー、全国図鑑番号はspecies.idを使用。
+- `src/api/pokemon.ts`: 欠番やフォームIDに対応する実在項目の索引取得。
+- `src/queryKeys.ts`: 索引キーを追加。
+- `src/components/PokemonTypeLabel.tsx`: 18タイプの色と背景に応じた文字色。
+- `src/pages/PokemonDetail.tsx`: 不正ID検証、再試行、説明・特性・種族値と合計・前後移動・一覧へ戻る。
+- `package.json` / lock: 教材指定のreact-loading-skeletonのみ追加。
+- `scripts/verify-api.mjs`: 詳細404/HTTP失敗、実APIの日本語・6種族値と合計318、フォームID10001と種族番号386の区別、索引取得の検証を追加。
+
+教材URLの末尾は `section-11-pokemon-list-screen` が正しい完全URLです。第11章は `section-12-pokemon-detail-screen`。
+
+### 検証
+
+第10章と第11章それぞれbuild・lint成功。既存APIテストに加えて詳細APIの正常/異常系と実API検証成功。ブラウザで初期スケルトン、日本語カード40件、追加取得で80件、カードから詳細、フシギダネの画像・説明・タイプ・特性・6種族値/合計318を確認。
+
+### 残作業
+
+第12章の各画面サイズでの体系的な表示確認、第13章のGitHub Pages設定・公開。第7〜9章のPRはマージしていないため、第10〜11章のレビューは `feat/chapters-7-9` をbaseにすると今回分だけ確認できます。mainへ直接push・マージは実施していません。
