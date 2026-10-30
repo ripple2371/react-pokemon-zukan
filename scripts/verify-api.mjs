@@ -126,6 +126,28 @@ try {
   await assert.rejects(api.fetchPokemonNeighbors(1), /一覧の取得に失敗/);
   globalThis.fetch = async () => json({ results: [entry(1)], next: null });
   assert.deepEqual(await api.fetchPokemonNeighbors(1), { previous: undefined, next: undefined });
+  api.resourceQueryClient.clear();
+  const originalTimeout = AbortSignal.timeout;
+  const deadlines = [];
+  try {
+    // 15秒の指定を確認したうえで、待機だけを5msに短縮する。
+    AbortSignal.timeout = (ms) => { deadlines.push(ms); return originalTimeout.call(AbortSignal, 5); };
+    globalThis.fetch = (_url, { signal }) => new Promise((resolve, reject) => {
+      const timer = setTimeout(() => resolve(json({})), 100);
+      signal.addEventListener('abort', () => { clearTimeout(timer); reject(signal.reason); }, { once: true });
+    });
+    const timeouts = await Promise.allSettled(Array.from({ length: 8 }, (_, i) => api.fetchResource(`https://pokeapi.co/timeout/${i}`, 'timeout')));
+    assert.equal(timeouts.filter(result => result.status === 'rejected' && result.reason.name === 'TimeoutError').length, 8);
+    assert.deepEqual(deadlines, Array(8).fill(15000));
+  } finally { AbortSignal.timeout = originalTimeout; }
+  // タイムアウト後も待ち行列の枠が解放され、次の通信が成功する。
+  globalThis.fetch = async () => json({ recovered: true });
+  assert.deepEqual(await api.fetchResource('https://pokeapi.co/recovered', 'failed'), { recovered: true });
+  globalThis.fetch = async () => new Response('invalid json');
+  await assert.rejects(api.fetchResource('https://pokeapi.co/malformed', 'failed'), SyntaxError);
+  globalThis.fetch = async () => json({ recovered: true });
+  assert.deepEqual(await api.fetchResource('https://pokeapi.co/malformed', 'failed'), { recovered: true });
+  console.log('PASS: timeout signal/deadline, queued request recovery, malformed JSON retry');
   console.log('PASS: concurrency=6, in-flight deduplication, cache reuse, gaps/forms/page boundary/first/last/missing ID, 500 then retry');
 
   console.log('PASS: 18タイプ、ページ引数、日本語優先順位、フォールバック、HTTP/通信エラー、クエリキーとキャッシュ');
