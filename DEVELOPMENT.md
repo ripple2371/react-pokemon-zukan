@@ -171,3 +171,81 @@ PR #1 → PR #2 → 今回PRの順。先行PRをマージ後、後続PRのbase�
 次回は第14章の状態管理・API連携の教材チェック、第15章のテスト/デバッグ拡充（ブラウザ通信失敗・実機・長い名前）、第16章の全体振り返り。公開はユーザー承認後にPages設定→手動実行→本番URLと詳細再読み込みを確認する。
 
 今回のPR: https://github.com/ripple2371/react-pokemon-zukan/pull/3 （base: feat/chapters-10-11、未マージ）。公開は未実施。
+
+## 第4回：第14〜16章の最終レビュー（2026-10-31）
+
+### 開始状態・対象範囲
+
+最新mainは `953bde9ebf331926ece0bca5b2488cdc9053e9b7`。PR #1〜#3を順に統合した状態と一致。未保存変更なしから `feat/final-review` を作成した。
+本番公開・Pages有効化・mainへのpush・PRマージ・既存ブランチ削除は実施しない。
+
+### 教材確認（第14〜16章）
+
+- 第14章（section-15-state-management-api）は読み物。Providerがモジュールスコープの共有QueryClientを使用し、画面のqueryKeyとURL別リソースキーを分離していることを確認。
+- 一覧/詳細/前後判定はQueryの状態を表示し、リソース取得はAPI層、前後判定はAPIと専用hookへ分離済み。UIの追加ローカル状態・新しい状態管理ライブラリは不要と判断。
+- staleTime 1時間は鮮度の期限、gcTime 24時間は非アクティブなデータを保持する期限であり、1時間ごとの定期通信を意味しない。キャッシュは再読み込みで消える。共有リソースのretryはfalse、一覧/詳細など呼出側Queryが再試行する構成を維持。
+- 第15章（section-16-testing-and-debugging）は正常時の観察とエラーの切り分けを確認。自動テストは教材上は任意だが、今回の指示に合わせ既存API検証を拡充し、実ブラウザで通信障害を再現するテストを追加。
+- 第16章（section-17-summary）は振り返りで新機能を追加する章ではない。必須の一覧・詳細・API・日本語・レスポンシブ・公開用構成は実装済み。検索/お気に入り/Local Storageなどの任意機能は追加しない。公開先の確認だけはユーザーの公開承認待ち。
+
+### 修正した問題
+
+1. 初回スケルトンが装飾のみで、読み込み状態の通知がなかった。一覧と詳細へrole=status・読み上げ用テキストを追加。
+2. 通常サイズの白文字ボタン・青リンクのコントラスト改善のためblue-500をblue-700へ変更。実描画色のテストで主要リンク・ボタン・タイプラベルの比率4.5以上を確認。キーボードfocus-visibleのアウトラインを追加。
+3. index.htmlのlang=enがテンプレートのまま残っていた。日本語の読み上げ指定としてlang=jaへ修正し、ページタイトルも日本語へ変更。回帰テストを追加。
+
+### テストとデバッグ
+
+追加依存は開発用 `@playwright/test` のみ（関連パッケージ計3個）。本番用依存は変更していない。Windowsは既存Google Chrome、その他OSはPlaywright Chromiumを使用。
+
+- API: 通信成功/失敗、404/500、名前のja-hrkt→ja→英語fallback、キャッシュ、同時6本、処理中URLの重複排除、欠番/フォーム/ページ境界/先頭末尾は既存テストで維持。
+- 追加API: 15,000msのタイムアウト指定を確認し、テスト時のみ待機を5msに置換してAbortSignalの実経路を検証。8件のtimeoutで待ち行列の枠が解放され、その後の取得が成功することを確認。不正JSONが成功キャッシュへ残らず再試行できることも確認。
+- UI: 8シナリオ×375/768/1280px＝24件。外部APIと画像を模擬するためネットワークなしで再現可能。
+- 40カードと81回のAPI呼出、名前/画像URL/番号/リンク整合、連続スクロールのoffset=40二重取得なし、80件に重複なし、詳細から戻った際のキャッシュ維持。
+- 初回500→自動再試行の上限→エラー表示→手動再読み込み、通信断→復旧、追加取得500→既存40件維持→再試行で80件まで復旧。
+- 詳細25のタイプ/特性/種族値、直接URL/再読み込み、Enterによる次へ移動、フォーム10001の全国番号386と欠番を跨ぐ前へリンク。
+- 不正ID（文字列・0・負数・小数・安全整数外）で通信なし。存在しないIDは1回の404で停止し、索引取得もしない。アプリ404表示も確認。
+- 初回スケルトンのstatus、全画像の代替テキスト、Tab移動・focusアウトライン、主要文字色/背景の4.5以上のコントラスト比、長い日本語説明・フォーム名を含む横overflowなしを確認。
+- 通常の一覧→詳細→一覧シナリオではブラウザのpageerrorおよびconsole error/warningなし。
+
+実行結果: npm ci / npm run build / npm run lint / npm run check:api / npm run check:api -- --live成功。npm run check:ui（テスト用TypeScript strictチェック＋本番build＋24テスト）成功。lang修正後、関連3画面幅の3テストとbuild/lintも再実行して成功。
+テスト出力のNO_COLOR/FORCE_COLOR警告は実行環境のターミナル色設定によるもので、Reactの警告ではない。
+
+### パフォーマンス測定
+
+新しい `scripts/measure-ui.mjs` は本番previewを新規Chromeセッションで開き、40カードがDOMへ出るまでを測定。画像全件ロード完了やLCPとは異なる指標。
+今回、APIの取得構成は変更していない。個体詳細のタイプ・特性と、フォームを含む種族情報の対応を保つため、初回81回を維持した。大きな設計変更による削減は対象外。
+
+| 単発測定 | レビュー前 | 修正後 |
+|---|---:|---:|
+| ブラウザ初回40件DOM表示 | 3,025ms / 81回 | 1,017ms / 81回 |
+| API関数：初回40件 | 422ms / 81回 / 同時最大6 | 358ms / 81回 / 同時最大6 |
+| API関数：同じ40件再取得 | 0ms / 0回 | 0ms / 0回 |
+| API関数：一覧後の詳細1 | 62ms / 10回 | 50ms / 10回 |
+| API関数：次40件 | 297ms / 81回 | 332ms / 81回 |
+
+各1回の実測。OS/ネットワーク側キャッシュ・回線の条件は統制していない。今回のUI修正による速度向上を示す値としては扱わず、再現方法と現状値の記録に限定する。React Profilerでの再レンダリング回数や実機でのFPSは未測定。不要なmemo化などの最適化は行っていない。
+
+### 品質・セキュリティ・未使用コード
+
+- TypeScript型チェック・Lint成功。テストコードもtsconfig.test.jsonでstrictチェック。
+- npm ciの監査は183パッケージ・既知の脆弱性0件（確認時点）。完全なセキュリティ保証ではない。
+- APIテキストはReactの通常レンダリングを使用。dangerouslySetInnerHTML・eval・個人情報の永続保存は使用していない。公開用ワークフローは従来の手動実行/main限定で維持。
+- 未使用の学習用src/PokemonCard.tsx、テンプレートsrc/App.css、vite/react画像などは既存履歴を尊重して保持。実行時importがないためアプリへ不要なコードは追加されない。未使用import/変数はLintとtscで確認。
+- 既存react-router直接依存はdom側とv7でdedupe済み。本番依存を不必要に増やしていない。
+
+### Pages公開前確認と残りの操作
+
+- Vite baseはdev=/、build/preview=/react-pokemon-zukan/。dist/index.html内のJS/CSS/faviconに公開用baseが付くことを確認。
+- HashRouterによる詳細 `/#/pokemon/25` の直接アクセス/再読み込みを、本番previewの3画面幅で確認。
+- deploy.ymlはworkflow_dispatchのみ、main限定、Node24、出力dist、公式Pages Actionsを使用。contents:read / pages:write / id-token:writeを確認。
+- 想定URLは https://ripple2371.github.io/react-pokemon-zukan/ 、詳細は https://ripple2371.github.io/react-pokemon-zukan/#/pokemon/25 。実PokeAPI通信は--liveおよびUI計測で確認。
+- Pages設定変更・Actions実行・本番デプロイは未実施。実UbuntuでのActions実行・実公開URL・iOS/Android実機・スクリーンリーダーでの人手確認は未検証。
+- READMEをプロジェクト向けに整理し、Windows初心者向けに「最終PRレビュー/マージ→Settings/Pages/SourceをGitHub Actionsへ→Actions/Deploy GitHub Pages/Run workflow/main→build/deploy成功確認→公開URL/詳細再読み込み確認」を記載。これら公開操作はユーザーの承認後にユーザーが実行する。
+
+### 変更ファイル一覧
+
+index.html、src/App.tsx、src/index.css、src/components/Header.tsx、src/components/Navigation.tsx、src/pages/PokemonList.tsx、src/pages/PokemonDetail.tsx、scripts/verify-api.mjs、scripts/measure-ui.mjs（新規）、tests/app.spec.ts（新規）、playwright.config.ts（新規）、tsconfig.test.json（新規）、package.json、package-lock.json、.gitignore、README.md、DEVELOPMENT.md。
+
+### 引き継ぎ
+
+本レビューPRのレビュー待ちで停止する。公開を妨げる新たな機能不具合はテスト範囲では発見していないが、上記の公開先/実機確認は残る。初回81回・英語fallbackのキャッシュ・後方フォームの索引走査・外部JSONの実行時検証なしといった既知の制限はREADMEに明記済み。
