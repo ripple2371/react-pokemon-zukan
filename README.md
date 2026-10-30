@@ -73,3 +73,7 @@ export default defineConfig([
 ])
 
 ```
+
+## 教材の進捗
+
+第7〜9章の実装・検証結果と残作業は [DEVELOPMENT.md](DEVELOPMENT.md) を参照してください。

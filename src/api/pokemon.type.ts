@@ -42,7 +42,15 @@ export interface PokemonStat {
 // ポケモンの技
 export interface PokemonMove {
   move: NamedAPIResource;
-  version_group_details: VersionDetail[];
+  version_group_details: PokemonMoveVersion[];
+}
+
+// 持ち物のVersionDetailとは異なる、技の習得情報。
+export interface PokemonMoveVersion {
+  move_learn_method: NamedAPIResource;
+  version_group: NamedAPIResource;
+  level_learned_at: number;
+  order: number | null;
 }
 
 // その他の補助的な型
@@ -65,8 +73,6 @@ export interface FlavorTextEntry {
   flavor_text: string;
   language: NamedAPIResource;
 }
-
-// src/api/pokemon.type.ts に続けて追加
 
 export interface Pokemon {
   id: number;
