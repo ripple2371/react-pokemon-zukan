@@ -12,6 +12,7 @@ const result = await build({
     load(id) {
       if (id === '\0verify') return `
         export * from '/src/api/pokemon.ts';
+        export * from '/src/api/resource.ts';
         export * from '/src/api/pokemonDetail.ts';
         export * from '/src/api/pokemonSpecies.ts';
         export * from '/src/api/pokemonWithJapaneseName.ts';
@@ -35,6 +36,7 @@ const detail = { id: 1, species: { url: speciesUrl }, types: [], abilities: [] }
 try {
   assert.equal(api.pokemonTypesMap.length, 18);
   assert.equal(new Set(api.pokemonTypesMap.map((item) => item.type)).size, 18);
+  api.resourceQueryClient.clear();
   globalThis.fetch = async (url) => {
     calls.push(url);
     if (url === detailUrl) return json(detail);
@@ -49,21 +51,27 @@ try {
   assert.equal(data.results[0].japaneseName, 'フシギダネ');
   assert.equal(data.results[0].number, '1');
   assert.equal(data.next, null);
+  api.resourceQueryClient.clear();
   globalThis.fetch = async () => json({ names: [{ name: '日本語名', language: { name: 'ja' } }] });
   assert.equal(await api.fetchPokemonJapaneseName(speciesUrl, 'fallback'), '日本語名');
+  api.resourceQueryClient.clear();
   globalThis.fetch = async () => json({ names: [] });
   assert.equal(await api.fetchPokemonJapaneseName(speciesUrl, 'fallback'), 'fallback');
   console.error = () => {};
+  api.resourceQueryClient.clear();
   globalThis.fetch = async () => new Response('', { status: 503 });
   await assert.rejects(api.fetchPokemonDetail(1), /詳細情報の取得に失敗/);
+  api.resourceQueryClient.clear();
   globalThis.fetch = async () => new Response('', { status: 404 });
   await assert.rejects(api.fetchPokemonDetail(999999), api.PokemonNotFoundError);
   await assert.rejects(api.fetchPokemonList(), /一覧の取得に失敗/);
   assert.equal(await api.fetchPokemonJapaneseName(speciesUrl, 'fallback'), 'fallback');
+  api.resourceQueryClient.clear();
   globalThis.fetch = async (url) => url === detailUrl
     ? new Response('', { status: 404 })
     : json({ results: [{ name: 'bulbasaur', url: detailUrl }] });
   await assert.rejects(api.fetchPokemonListWithJapaneseNames(), /詳細情報の取得に失敗/);
+  api.resourceQueryClient.clear();
   globalThis.fetch = async () => { throw new TypeError('Network failure'); };
   await assert.rejects(api.fetchPokemonList(), /Network failure/);
   assert.equal(await api.fetchPokemonJapaneseName(speciesUrl, 'fallback'), 'fallback');
@@ -79,10 +87,13 @@ try {
   } finally { client.clear(); }
   console.log('PASS: 18タイプ、ページ引数、日本語優先順位、フォールバック、HTTP/通信エラー、クエリキーとキャッシュ');
 } finally {
+  api.resourceQueryClient.clear();
+  api.resourceQueryClient.clear();
   globalThis.fetch = originalFetch;
   console.error = originalError;
 }
 if (process.argv.includes('--live')) {
+  api.resourceQueryClient.clear();
   globalThis.fetch = (url, options) => originalFetch(url, { ...options, signal: AbortSignal.timeout(15000) });
   try {
     const first = await api.fetchPokemonListWithJapaneseNames(0, 1);

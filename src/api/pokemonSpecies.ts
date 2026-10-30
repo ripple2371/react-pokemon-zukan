@@ -1,3 +1,4 @@
+import { fetchResource } from './resource';
 // src/api/pokemonSpecies.ts
 type SpeciesName = {
   name: string;
@@ -16,11 +17,7 @@ export const fetchPokemonJapaneseName = async (
   fallbackName: string
 ): Promise<string> => {
   try {
-    const response = await fetch(speciesUrl);
-    if (!response.ok) {
-      throw new Error('ポケモン種族情報の取得に失敗しました');
-    }
-    const data: SpeciesData = await response.json();
+    const data = await fetchResource<SpeciesData>(speciesUrl, 'ポケモン種族情報の取得に失敗しました');
     const japaneseNameEntry = data.names.find((nameEntry) => nameEntry.language.name === 'ja-hrkt')
       ?? data.names.find((nameEntry) => nameEntry.language.name === 'ja');
     return japaneseNameEntry ? japaneseNameEntry.name : fallbackName;

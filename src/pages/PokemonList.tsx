@@ -25,6 +25,9 @@ const PokemonList: React.FC = () => {
   } = useInfiniteQuery({
     queryKey: apiQueryKeys.pokemon.list,
     queryFn: ({ pageParam = 0 }) => fetchPokemonListWithJapaneseNames(pageParam, PAGE_SIZE),
+    staleTime: 60 * 60 * 1000,
+    gcTime: 24 * 60 * 60 * 1000,
+    retry: 2,
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => {
       if (lastPage.next) {
@@ -42,7 +45,7 @@ const PokemonList: React.FC = () => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasNextPage && !isFetching && !isFetchNextPageError) {
-          void fetchNextPage();
+          void fetchNextPage({ cancelRefetch: false });
         }
       },
       { threshold: 1.0 }
@@ -88,12 +91,12 @@ const PokemonList: React.FC = () => {
         {isFetchingNextPage ? <Loader /> : isFetchNextPageError ? (
           <>
             <p role="alert">続きの読み込みに失敗しました。</p>
-            <button type="button" onClick={() => void fetchNextPage()} disabled={isFetching} className="text-blue-500 underline disabled:opacity-50">
+            <button type="button" onClick={() => void fetchNextPage({ cancelRefetch: false })} disabled={isFetching} className="text-blue-500 underline disabled:opacity-50">
               続きを再読み込み
             </button>
           </>
         ) : hasNextPage ? (
-          <button type="button" onClick={() => void fetchNextPage()} disabled={isFetching} className="text-blue-500 underline disabled:opacity-50">
+          <button type="button" onClick={() => void fetchNextPage({ cancelRefetch: false })} disabled={isFetching} className="text-blue-500 underline disabled:opacity-50">
             続きを読み込む
           </button>
         ) : null}
