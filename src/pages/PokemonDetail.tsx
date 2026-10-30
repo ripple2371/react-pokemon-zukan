@@ -27,9 +27,9 @@ const PokemonDetail: React.FC = () => {
 
   if (!isValidId) {
     return (
-      <div className="p-4">
+      <div className="p-4 md:p-6 max-w-7xl mx-auto break-words">
         <p role="alert">図鑑番号が正しくありません。</p>
-        <Link to="/" className="mt-3 inline-block text-blue-500 underline">一覧に戻る</Link>
+        <Link to="/" className="mt-3 inline-block text-blue-500 underline min-h-11 inline-flex items-center justify-center">一覧に戻る</Link>
       </div>
     );
   }
@@ -37,12 +37,12 @@ const PokemonDetail: React.FC = () => {
   if (!data) {
     const notFound = error instanceof PokemonNotFoundError;
     return (
-      <div className="p-4">
+      <div className="p-4 md:p-6 max-w-7xl mx-auto break-words">
         <p role="alert">{notFound ? 'ポケモンが見つかりません。' : 'ポケモンを読み込めませんでした。接続を確認して、もう一度お試しください。'}</p>
-        <div className="mt-3 flex items-center gap-4">
-          <Link to="/" className="text-blue-500 underline">一覧に戻る</Link>
+        <div className="mt-3 flex flex-wrap items-center gap-4">
+          <Link to="/" className="text-blue-500 underline min-h-11 inline-flex items-center justify-center">一覧に戻る</Link>
           {!notFound ? (
-            <button type="button" onClick={() => void refetch()} disabled={isFetching} className="px-4 py-2 bg-blue-500 text-white rounded-md disabled:opacity-50">
+            <button type="button" onClick={() => void refetch()} disabled={isFetching} className="px-4 py-2 bg-blue-500 text-white rounded-md disabled:opacity-50 min-h-11 inline-flex items-center justify-center">
               再読み込み
             </button>
           ) : null}
@@ -53,31 +53,31 @@ const PokemonDetail: React.FC = () => {
   const totalStats = data.baseStats.reduce((sum, stat) => sum + stat.value, 0);
 
   return (
-    <div className="p-4 max-w-[400px] m-auto">
-      <Link to="/" className="px-4 py-2 bg-blue-500 text-white rounded-md mb-4">← 一覧に戻る</Link>
+    <div className="p-4 md:p-6 max-w-[400px] md:max-w-2xl m-auto break-words">
+      <Link to="/" className="px-4 py-2 bg-blue-500 text-white rounded-md mb-4 min-h-11 inline-flex items-center justify-center">← 一覧に戻る</Link>
       {error ? (
         <div className="mt-4">
           <p role="alert">情報を更新できませんでした。前に読み込んだ内容を表示しています。</p>
-          <button type="button" onClick={() => void refetch()} disabled={isFetching} className="mt-2 text-blue-500 underline disabled:opacity-50">
+          <button type="button" onClick={() => void refetch()} disabled={isFetching} className="mt-2 text-blue-500 underline disabled:opacity-50 min-h-11 inline-flex items-center justify-center">
             再読み込み
           </button>
         </div>
       ) : null}
-      <div className="mt-4 bg-white shadow-md rounded p-8 flex flex-col items-center gap-4">
+      <div className="mt-4 bg-white shadow-md rounded p-4 sm:p-8 flex flex-col items-center gap-4">
         {data.image ? (
-          <img src={data.image} alt={data.japaneseName} className="w-40 h-40" />
+          <img src={data.image} alt={data.japaneseName} className="w-40 h-40 md:w-48 md:h-48" />
         ) : (
-          <div className="w-40 h-40 flex items-center justify-center text-gray-500">画像がありません</div>
+          <div className="w-40 h-40 md:w-48 md:h-48 flex items-center justify-center text-gray-500">画像がありません</div>
         )}
-        <h1 className="mt-4 text-2xl font-bold">{data.japaneseName} (#{data.number})</h1>
-        <p className="mt-2 text-justify">{data.description}</p>
+        <h1 className="mt-4 text-xl sm:text-2xl font-bold text-center break-words max-w-full">{data.japaneseName} (#{data.number})</h1>
+        <p className="mt-2 leading-relaxed whitespace-pre-line">{data.description}</p>
         <div className="grid grid-cols-2 gap-2">
           {data?.types?.map((type) => (
             <PokemonTypeLabel key={type} type={type} />
           ))}
         </div>
         <span className="w-fit whitespace-nowrap text-right">特性</span>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 min-w-0">
           <div className="grid grid-cols-2 gap-2 w-full">
             {data?.abilities?.map((ability) => (
               <span key={ability}>{ability}</span>
@@ -87,40 +87,40 @@ const PokemonDetail: React.FC = () => {
         <div className="mt-4 grid grid-cols-1 gap-x-2 w-full">
           {data?.baseStats?.map((stat) => (
             <div key={stat.name} className="flex items-center">
-              <span className="w-24 text-right mr-2">{stat.name}</span>
-              <div className="flex-1 bg-gray-200 rounded-full h-4">
+              <span className="w-20 sm:w-24 shrink-0 text-right mr-2">{stat.name}</span>
+              <div className="min-w-0 flex-1 bg-gray-200 rounded-full h-4">
                 <div
                   className="bg-blue-600 rounded-full h-4"
                   style={{ width: `${Math.min((stat.value / 255) * 100, 100)}%` }}
                 ></div>
               </div>
-              <span className="ml-2 w-8">{stat.value}</span>
+              <span className="ml-2 w-8 shrink-0">{stat.value}</span>
             </div>
           ))}
           {/* 合計種族値 */}
           <div className="flex items-center">
-            <span className="w-24 text-right mr-2">合計</span>
-            <div className="flex-1 bg-gray-200 rounded-full h-4">
+            <span className="w-20 sm:w-24 shrink-0 text-right mr-2">合計</span>
+            <div className="min-w-0 flex-1 bg-gray-200 rounded-full h-4">
               <div
                 className="bg-blue-600 rounded-full h-4"
                 style={{ width: `${Math.min((totalStats / 780) * 100, 100)}%` }}
               ></div>
             </div>
-            <span className="ml-2 w-8">{totalStats}</span>
+            <span className="ml-2 w-8 shrink-0">{totalStats}</span>
           </div>
         </div>
       </div>
       {indexError && !neighbors ? (
         <div className="mt-4">
           <p role="alert">前後のポケモンを確認できませんでした。</p>
-          <button type="button" onClick={() => void refetchIndex()} disabled={isFetchingIndex} className="mt-2 text-blue-500 underline disabled:opacity-50">
+          <button type="button" onClick={() => void refetchIndex()} disabled={isFetchingIndex} className="mt-2 text-blue-500 underline disabled:opacity-50 min-h-11 inline-flex items-center justify-center">
             再読み込み
           </button>
         </div>
       ) : (
         <div className="mt-4 flex justify-between">
-          {previousPokemon ? <Link to={`/pokemon/${previousPokemon.url.split('/').filter(Boolean).pop()}`} className="px-4 py-2 bg-blue-500 text-white rounded-md">前へ</Link> : <span />}
-          {nextPokemon ? <Link to={`/pokemon/${nextPokemon.url.split('/').filter(Boolean).pop()}`} className="px-4 py-2 bg-blue-500 text-white rounded-md">次へ</Link> : null}
+          {previousPokemon ? <Link to={`/pokemon/${previousPokemon.url.split('/').filter(Boolean).pop()}`} className="px-4 py-2 bg-blue-500 text-white rounded-md min-h-11 inline-flex items-center justify-center">前へ</Link> : <span />}
+          {nextPokemon ? <Link to={`/pokemon/${nextPokemon.url.split('/').filter(Boolean).pop()}`} className="px-4 py-2 bg-blue-500 text-white rounded-md min-h-11 inline-flex items-center justify-center">次へ</Link> : null}
         </div>
       )}
     </div>
@@ -129,11 +129,11 @@ const PokemonDetail: React.FC = () => {
 
 const PokemonDetailSkeleton: React.FC = () => {
   return (
-    <div className="p-4 max-w-[400px] m-auto">
-      <div className="px-4 py-2 bg-blue-500 text-white rounded-md mb-4 w-24">
+    <div className="p-4 md:p-6 max-w-[400px] md:max-w-2xl m-auto break-words">
+      <div className="px-4 py-2 bg-blue-500 text-white rounded-md mb-4 w-24 min-h-11 inline-flex items-center justify-center">
         <Skeleton />
       </div>
-      <div className="mt-4 bg-white shadow-md rounded p-8 flex flex-col items-center gap-4">
+      <div className="mt-4 bg-white shadow-md rounded p-4 sm:p-8 flex flex-col items-center gap-4">
         <Skeleton circle={true} width={160} height={160} />
         <Skeleton width={200} height={24} />
         <div className="w-full"><Skeleton height={60} /></div>
