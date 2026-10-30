@@ -77,3 +77,22 @@ export default defineConfig([
 ## 教材の進捗
 
 第7〜9章の実装・検証結果と残作業は [DEVELOPMENT.md](DEVELOPMENT.md) を参照してください。
+
+## GitHub Pages（公開準備のみ）
+
+想定URL: https://ripple2371.github.io/react-pokemon-zukan/
+詳細URL: https://ripple2371.github.io/react-pokemon-zukan/#/pokemon/25
+
+Node.js 24で `npm ci`、`npm run build`、`npm run preview` を実行し、
+`http://localhost:4173/react-pokemon-zukan/#/pokemon/25` を直接開いて再読み込みを確認します。
+開発サーバーはベースパス `/`、本番ビルドとpreviewは `/react-pokemon-zukan/` です。
+HashRouterのため、ルート部分は `#/pokemon/25` です。`/pokemon/25` をハッシュなしで公開URLに付ける方式は使いません。
+
+公開はまだ行っていません。ワークフローはpush時には動かず、手動実行のみです。
+ユーザーが公開を承認した後、PR #1 → #2 → 第12〜13章PRの順にmainへ統合し、
+Settings → PagesのSourceをGitHub Actionsに設定してください。
+その後ActionsのDeploy GitHub Pagesを **main** に対して手動実行します。
+他ブランチではbuild jobがスキップされます。Pagesの設定変更・実行・本番確認にはユーザーの承認が必要です。
+
+教材のpush自動公開トリガーは、確認前に公開しないため意図的に省略しています。
+公開後も自動化が必要なら、承認後にmainのpushトリガーを追加してください。
