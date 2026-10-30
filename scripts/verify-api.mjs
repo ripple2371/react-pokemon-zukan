@@ -13,6 +13,7 @@ const result = await build({
       if (id === '\0verify') return `
         export * from '/src/api/pokemon.ts';
         export * from '/src/api/resource.ts';
+        export * from '/src/api/pokemonNavigation.ts';
         export * from '/src/api/pokemonDetail.ts';
         export * from '/src/api/pokemonSpecies.ts';
         export * from '/src/api/pokemonWithJapaneseName.ts';
@@ -85,6 +86,48 @@ try {
     assert.notDeepEqual(api.apiQueryKeys.pokemon.detail(1), api.apiQueryKeys.pokemon.detail(25));
     assert.notDeepEqual(api.apiQueryKeys.pokemon.list, api.apiQueryKeys.pokemon.detail(1));
   } finally { client.clear(); }
+
+  api.resourceQueryClient.clear();
+  let active = 0, peak = 0; requests = 0;
+  globalThis.fetch = async () => {
+    requests++; active++; peak = Math.max(peak, active);
+    await new Promise((resolve) => setTimeout(resolve, 2));
+    active--; return json({ ok: true });
+  };
+  await Promise.all(Array.from({ length: 20 }, (_, i) => api.fetchResource('https://pokeapi.co/test/' + i, 'failed')));
+  assert.equal(peak, 6);
+  await Promise.all([api.fetchResource('https://pokeapi.co/test/shared', 'failed'), api.fetchResource('https://pokeapi.co/test/shared/', 'failed')]);
+  assert.equal(requests, 21);
+  await api.fetchResource('https://pokeapi.co/test/shared', 'failed');
+  assert.equal(requests, 21);
+  api.resourceQueryClient.clear();
+  const entry = (id) => ({ name: String(id), url: `https://pokeapi.co/api/v2/pokemon/${id}/` });
+  requests = 0;
+  globalThis.fetch = async (url) => {
+    requests++;
+    return json(String(url).includes('offset=200')
+      ? { count: 3, next: null, previous: 'unused', results: [entry(10001)] }
+      : { count: 3, next: 'https://pokeapi.co/api/v2/pokemon?offset=200&limit=200', previous: null, results: [entry(1), entry(25)] });
+  };
+  let neighbors = await api.fetchPokemonNeighbors(1);
+  assert.equal(neighbors.previous, undefined);
+  assert.equal(neighbors.next.name, '25');
+  assert.equal(requests, 1);
+  neighbors = await api.fetchPokemonNeighbors(25);
+  assert.equal(neighbors.previous.name, '1');
+  assert.equal(neighbors.next.name, '10001');
+  neighbors = await api.fetchPokemonNeighbors(10001);
+  assert.equal(neighbors.previous.name, '25');
+  assert.equal(neighbors.next, undefined);
+  assert.deepEqual(await api.fetchPokemonNeighbors(999), {});
+  assert.equal(requests, 2);
+  api.resourceQueryClient.clear();
+  globalThis.fetch = async () => new Response('', { status: 500 });
+  await assert.rejects(api.fetchPokemonNeighbors(1), /一覧の取得に失敗/);
+  globalThis.fetch = async () => json({ results: [entry(1)], next: null });
+  assert.deepEqual(await api.fetchPokemonNeighbors(1), { previous: undefined, next: undefined });
+  console.log('PASS: concurrency=6, in-flight deduplication, cache reuse, gaps/forms/page boundary/first/last/missing ID, 500 then retry');
+
   console.log('PASS: 18タイプ、ページ引数、日本語優先順位、フォールバック、HTTP/通信エラー、クエリキーとキャッシュ');
 } finally {
   api.resourceQueryClient.clear();
@@ -115,5 +158,5 @@ if (process.argv.includes('--live')) {
     const index = await api.fetchPokemonIndex();
     assert.ok(index.some((pokemon) => pokemon.url.endsWith('/10001/')));
     console.log('PASS: 実PokeAPIの一覧・詳細・日本語名取得、次ページ取得');
-  } finally { globalThis.fetch = originalFetch; }
+  } finally { api.resourceQueryClient.clear(); globalThis.fetch = originalFetch; }
 }
