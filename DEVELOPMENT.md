@@ -67,3 +67,8 @@ npm run dev
 4. 第13章以降: GitHub Pages用Router/base設定、状態管理、デバッグ・テスト、公開手順を教材に沿って実施。
 
 mainへの直接push・マージは行わず、`feat/chapters-7-9` でレビューします。
+
+## 第2回：第7〜9章の再確認
+
+18タイプ・API・日本語フォールバック・Provider・キーを再確認。build・lint・check:api -- --live成功。全importがreact-router-domを使用していることを確認し、直接依存react-routerを7.18.5に統一。dom側の7.18.5と重複を解消し、ルーティングAPIの変更なし。
+
