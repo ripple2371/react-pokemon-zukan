@@ -153,6 +153,7 @@ test('contrast, visible keyboard focus and image alternatives', async ({ page })
   await fixture(page);
   await page.goto('./#/pokemon/25');
   await expect(page.getByRole('heading', { name: 'ピカチュウ (#25)' })).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'ja');
   await page.keyboard.press('Tab');
   await expect(page.getByRole('link', { name: /ポケモン図鑑/ })).toBeFocused();
   const outline = await page.locator(':focus').evaluate(element => getComputedStyle(element).outlineStyle);
