@@ -12,7 +12,7 @@ const Navigation: React.FC = () => {
         {
           pathname !== '/' && (
             <li>
-              <Link to="/" className="text-blue-500 hover:underline no-underline min-h-11 inline-flex items-center justify-center">{"< "}一覧</Link>
+              <Link to="/" className="text-blue-700 hover:underline no-underline min-h-11 inline-flex items-center justify-center">{"< "}一覧</Link>
             </li>
           )
         }

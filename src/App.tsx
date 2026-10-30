@@ -18,7 +18,7 @@ const App: React.FC = () => {
           <Route path="*" element={
             <div className="p-4 md:p-6 max-w-7xl mx-auto break-words">
               <h2 className="text-xl">ページが見つかりません。</h2>
-              <Link to="/" className="mt-3 inline-block text-blue-500 underline min-h-11 inline-flex items-center justify-center">一覧に戻る</Link>
+              <Link to="/" className="mt-3 text-blue-700 underline min-h-11 inline-flex items-center justify-center">一覧に戻る</Link>
             </div>
           } />
         </Routes>
