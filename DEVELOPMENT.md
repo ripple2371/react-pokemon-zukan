@@ -171,4 +171,3 @@ PR #1 → PR #2 → 今回PRの順。先行PRをマージ後、後続PRのbase�
 次回は第14章の状態管理・API連携の教材チェック、第15章のテスト/デバッグ拡充（ブラウザ通信失敗・実機・長い名前）、第16章の全体振り返り。公開はユーザー承認後にPages設定→手動実行→本番URLと詳細再読み込みを確認する。
 
 今回のPR: https://github.com/ripple2371/react-pokemon-zukan/pull/3 （base: feat/chapters-10-11、未マージ）。公開は未実施。
-
