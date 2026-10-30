@@ -6,3 +6,10 @@
   --color-brand: #ffcb05;
   --color-brand-dark: #b98c00;
 }
+
+@layer base {
+  a:focus-visible, button:focus-visible {
+    outline: 3px solid #1d4ed8;
+    outline-offset: 3px;
+  }
+}

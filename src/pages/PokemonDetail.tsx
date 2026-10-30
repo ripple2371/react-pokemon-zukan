@@ -29,7 +29,7 @@ const PokemonDetail: React.FC = () => {
     return (
       <div className="p-4 md:p-6 max-w-7xl mx-auto break-words">
         <p role="alert">図鑑番号が正しくありません。</p>
-        <Link to="/" className="mt-3 inline-block text-blue-500 underline min-h-11 inline-flex items-center justify-center">一覧に戻る</Link>
+        <Link to="/" className="mt-3 text-blue-700 underline min-h-11 inline-flex items-center justify-center">一覧に戻る</Link>
       </div>
     );
   }
@@ -40,9 +40,9 @@ const PokemonDetail: React.FC = () => {
       <div className="p-4 md:p-6 max-w-7xl mx-auto break-words">
         <p role="alert">{notFound ? 'ポケモンが見つかりません。' : 'ポケモンを読み込めませんでした。接続を確認して、もう一度お試しください。'}</p>
         <div className="mt-3 flex flex-wrap items-center gap-4">
-          <Link to="/" className="text-blue-500 underline min-h-11 inline-flex items-center justify-center">一覧に戻る</Link>
+          <Link to="/" className="text-blue-700 underline min-h-11 inline-flex items-center justify-center">一覧に戻る</Link>
           {!notFound ? (
-            <button type="button" onClick={() => void refetch()} disabled={isFetching} className="px-4 py-2 bg-blue-500 text-white rounded-md disabled:opacity-50 min-h-11 inline-flex items-center justify-center">
+            <button type="button" onClick={() => void refetch()} disabled={isFetching} className="px-4 py-2 bg-blue-700 text-white rounded-md disabled:opacity-50 min-h-11 inline-flex items-center justify-center">
               再読み込み
             </button>
           ) : null}
@@ -54,11 +54,11 @@ const PokemonDetail: React.FC = () => {
 
   return (
     <div className="p-4 md:p-6 max-w-[400px] md:max-w-2xl m-auto break-words">
-      <Link to="/" className="px-4 py-2 bg-blue-500 text-white rounded-md mb-4 min-h-11 inline-flex items-center justify-center">← 一覧に戻る</Link>
+      <Link to="/" className="px-4 py-2 bg-blue-700 text-white rounded-md mb-4 min-h-11 inline-flex items-center justify-center">← 一覧に戻る</Link>
       {error ? (
         <div className="mt-4">
           <p role="alert">情報を更新できませんでした。前に読み込んだ内容を表示しています。</p>
-          <button type="button" onClick={() => void refetch()} disabled={isFetching} className="mt-2 text-blue-500 underline disabled:opacity-50 min-h-11 inline-flex items-center justify-center">
+          <button type="button" onClick={() => void refetch()} disabled={isFetching} className="mt-2 text-blue-700 underline disabled:opacity-50 min-h-11 inline-flex items-center justify-center">
             再読み込み
           </button>
         </div>
@@ -113,14 +113,14 @@ const PokemonDetail: React.FC = () => {
       {indexError && !neighbors ? (
         <div className="mt-4">
           <p role="alert">前後のポケモンを確認できませんでした。</p>
-          <button type="button" onClick={() => void refetchIndex()} disabled={isFetchingIndex} className="mt-2 text-blue-500 underline disabled:opacity-50 min-h-11 inline-flex items-center justify-center">
+          <button type="button" onClick={() => void refetchIndex()} disabled={isFetchingIndex} className="mt-2 text-blue-700 underline disabled:opacity-50 min-h-11 inline-flex items-center justify-center">
             再読み込み
           </button>
         </div>
       ) : (
         <div className="mt-4 flex justify-between">
-          {previousPokemon ? <Link to={`/pokemon/${previousPokemon.url.split('/').filter(Boolean).pop()}`} className="px-4 py-2 bg-blue-500 text-white rounded-md min-h-11 inline-flex items-center justify-center">前へ</Link> : <span />}
-          {nextPokemon ? <Link to={`/pokemon/${nextPokemon.url.split('/').filter(Boolean).pop()}`} className="px-4 py-2 bg-blue-500 text-white rounded-md min-h-11 inline-flex items-center justify-center">次へ</Link> : null}
+          {previousPokemon ? <Link to={`/pokemon/${previousPokemon.url.split('/').filter(Boolean).pop()}`} className="px-4 py-2 bg-blue-700 text-white rounded-md min-h-11 inline-flex items-center justify-center">前へ</Link> : <span />}
+          {nextPokemon ? <Link to={`/pokemon/${nextPokemon.url.split('/').filter(Boolean).pop()}`} className="px-4 py-2 bg-blue-700 text-white rounded-md min-h-11 inline-flex items-center justify-center">次へ</Link> : null}
         </div>
       )}
     </div>
@@ -129,8 +129,9 @@ const PokemonDetail: React.FC = () => {
 
 const PokemonDetailSkeleton: React.FC = () => {
   return (
-    <div className="p-4 md:p-6 max-w-[400px] md:max-w-2xl m-auto break-words">
-      <div className="px-4 py-2 bg-blue-500 text-white rounded-md mb-4 w-24 min-h-11 inline-flex items-center justify-center">
+    <div role="status" aria-label="ポケモンを読み込み中" className="p-4 md:p-6 max-w-[400px] md:max-w-2xl m-auto break-words">
+      <span className="sr-only">ポケモンを読み込み中</span>
+      <div className="px-4 py-2 bg-blue-700 text-white rounded-md mb-4 w-24 min-h-11 inline-flex items-center justify-center">
         <Skeleton />
       </div>
       <div className="mt-4 bg-white shadow-md rounded p-4 sm:p-8 flex flex-col items-center gap-4">

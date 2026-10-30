@@ -63,7 +63,7 @@ const PokemonList: React.FC = () => {
     return (
       <div className="p-4 md:p-6 max-w-7xl mx-auto break-words">
         <p role="alert">ポケモン一覧を読み込めませんでした。接続を確認して、もう一度お試しください。</p>
-        <button type="button" onClick={() => void refetch()} disabled={isFetching} className="mt-3 px-4 py-2 bg-blue-500 text-white rounded-md disabled:opacity-50 min-h-11 inline-flex items-center justify-center">
+        <button type="button" onClick={() => void refetch()} disabled={isFetching} className="mt-3 px-4 py-2 bg-blue-700 text-white rounded-md disabled:opacity-50 min-h-11 inline-flex items-center justify-center">
           再読み込み
         </button>
       </div>
@@ -75,7 +75,7 @@ const PokemonList: React.FC = () => {
       {status === 'error' && !isFetchNextPageError ? (
         <div className="mb-4">
           <p role="alert">一覧を更新できませんでした。前に読み込んだ内容を表示しています。</p>
-          <button type="button" onClick={() => void refetch()} disabled={isFetching} className="mt-2 text-blue-500 underline disabled:opacity-50 min-h-11 inline-flex items-center justify-center">
+          <button type="button" onClick={() => void refetch()} disabled={isFetching} className="mt-2 text-blue-700 underline disabled:opacity-50 min-h-11 inline-flex items-center justify-center">
             再読み込み
           </button>
         </div>
@@ -91,12 +91,12 @@ const PokemonList: React.FC = () => {
         {isFetchingNextPage ? <Loader /> : isFetchNextPageError ? (
           <>
             <p role="alert">続きの読み込みに失敗しました。</p>
-            <button type="button" onClick={() => void fetchNextPage({ cancelRefetch: false })} disabled={isFetching} className="text-blue-500 underline disabled:opacity-50 min-h-11 inline-flex items-center justify-center">
+            <button type="button" onClick={() => void fetchNextPage({ cancelRefetch: false })} disabled={isFetching} className="text-blue-700 underline disabled:opacity-50 min-h-11 inline-flex items-center justify-center">
               続きを再読み込み
             </button>
           </>
         ) : hasNextPage ? (
-          <button type="button" onClick={() => void fetchNextPage({ cancelRefetch: false })} disabled={isFetching} className="text-blue-500 underline disabled:opacity-50 min-h-11 inline-flex items-center justify-center">
+          <button type="button" onClick={() => void fetchNextPage({ cancelRefetch: false })} disabled={isFetching} className="text-blue-700 underline disabled:opacity-50 min-h-11 inline-flex items-center justify-center">
             続きを読み込む
           </button>
         ) : null}
@@ -112,7 +112,8 @@ const Loader: React.FC = () => (
 
 const PokemonListSkeleton: React.FC = () => {
   return (
-    <div className="p-4 md:p-6 max-w-7xl mx-auto break-words">
+    <div role="status" aria-label="ポケモンを読み込み中" className="p-4 md:p-6 max-w-7xl mx-auto break-words">
+      <span className="sr-only">ポケモンを読み込み中</span>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
         {[...Array(18)].map((_, index) => (
           <div key={index} className="bg-white shadow-md rounded-lg p-4">

@@ -5,7 +5,7 @@ import logo from '../assets/logo.svg';
 
 const Header: React.FC = () => {
   return (
-    <header className="bg-blue-500 text-white p-4 min-h-11 inline-flex items-center justify-center">
+    <header className="bg-blue-700 text-white p-4 min-h-11 inline-flex items-center justify-center">
       <h1 className="text-xl md:text-2xl">
         <Link to="/" className="inline-flex items-center gap-2 no-underline">
           <img
